@@ -146,6 +146,8 @@ class ChatListFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClick
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(address12, 15F))
                 searchbox.text = null
 
+            } else{
+
             }
         }
 
