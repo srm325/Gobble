@@ -85,7 +85,10 @@ class PostAdapter(var postList: List<Post>, val callback: FeedFragmentCallback) 
             holder.cancelButton.visibility = x
             callback.onCancelClaimClicked(postList[position].id)
         }
-
+        if(postList[position].image.isEmpty())
+            holder.postImage.makeItGone()
+        else
+            holder.postImage.makeItVisible()
         if(postList[position].description.isEmpty())
             holder.description.makeItGone()
         else

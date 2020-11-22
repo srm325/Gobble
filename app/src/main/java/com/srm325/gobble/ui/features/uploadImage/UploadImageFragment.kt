@@ -10,7 +10,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.Switch
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.srm325.gobble.R
@@ -64,45 +67,49 @@ class UploadImageFragment : Fragment() {
             )
         }
 
+
         uploadBtn.setOnClickListener {
 
-            if(address_field==null){
+            if (address_field == null) {
                 Toast.makeText(requireContext(), "Must type address", Toast.LENGTH_SHORT).show()
-            }else {
+            } else {
                 if (description_field == null) {
-                    Toast.makeText(requireContext(), "Must type description", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Must type crime info", Toast.LENGTH_SHORT)
+                        .show()
                 } else {
+                    if (bitmap != null) {
 
-                    main_group.visibility = View.GONE
-                    progressBar.visibility = View.VISIBLE
 
-                    val baos = ByteArrayOutputStream()
-                    bitmap!!.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-                    val data = baos.toByteArray()
+                        main_group.visibility = View.GONE
+                        progressBar.visibility = View.VISIBLE
 
-                    val storageRef = storage.reference
-                    val currentTime = Timestamp(System.currentTimeMillis())
-                    val filename = "$currentTime.jpg"
-                    val imagesRef = storageRef.child("images/$filename")
-                    val uploadTask = imagesRef.putBytes(data)
+                        val baos = ByteArrayOutputStream()
+                        bitmap!!.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+                        val data = baos.toByteArray()
 
-                    val tsLong = System.currentTimeMillis() / 1000
-                    val ts = tsLong.toString()
-                    val urlTask = uploadTask.continueWithTask {
-                        imagesRef.downloadUrl
-                    }.addOnCompleteListener { taskSnapshot ->
+                        val storageRef = storage.reference
+                        val currentTime = Timestamp(System.currentTimeMillis())
+                        val filename = "$currentTime.jpg"
+                        val imagesRef = storageRef.child("images/$filename")
+                        val uploadTask = imagesRef.putBytes(data)
 
-                        imagesRef.downloadUrl.onSuccessTask {
-                            val post = Post(
+                        val tsLong = System.currentTimeMillis() / 1000
+                        val ts = tsLong.toString()
+                        val urlTask = uploadTask.continueWithTask {
+                            imagesRef.downloadUrl
+                        }.addOnCompleteListener { taskSnapshot ->
+
+                            imagesRef.downloadUrl.onSuccessTask {
+                                val post = Post(
                                     id = ts,
                                     user = viewModel.getCurrentUser(),
                                     address = address_field.text.toString(),
                                     description = description_field.text.toString(),
                                     image = taskSnapshot.result.toString()
-                            )
+                                )
 
-                            // add the post to firestore
-                            db.collection("posts").document(ts)
+                                // add the post to firestore
+                                db.collection("posts").document(ts)
                                     .set(post)
                                     .addOnSuccessListener {
                                         main_group.visibility = View.VISIBLE
@@ -110,21 +117,47 @@ class UploadImageFragment : Fragment() {
                                         bitmap = null
 
                                         Toast.makeText(
-                                                requireContext(),
-                                                "Successfully Uploaded",
-                                                Toast.LENGTH_SHORT
+                                            requireContext(),
+                                            "Successfully Uploaded",
+                                            Toast.LENGTH_SHORT
                                         ).show()
                                     }
                                     .addOnFailureListener { e ->
 
                                     }
+                            }
                         }
+                    } else {
+                        val storageRef = storage.reference
+                        val currentTime = Timestamp(System.currentTimeMillis())
+                        val tsLong = System.currentTimeMillis() / 1000
+                        val ts = tsLong.toString()
+                        val post = Post(
+                            id = ts,
+                            user = viewModel.getCurrentUser(),
+                            address = address_field.text.toString(),
+                            description = description_field.text.toString(),
+                        )
+
+                        // add the post to firestore
+                        db.collection("posts").document(ts)
+                            .set(post)
+                            .addOnSuccessListener {
+                                main_group.visibility = View.VISIBLE
+                                progressBar.visibility = View.GONE
+                                bitmap = null
+
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Successfully Uploaded",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                     }
                 }
+
             }
-
         }
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

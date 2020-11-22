@@ -44,7 +44,7 @@
         android:id="@+id/chatListFragment"
         android:name="com.srm325.gobble.ui.features.map.ChatListFragment"
         android:label="Thanksgiving dinners near me"
-        tools:layout="@layout/chat_list_fragment" />
+        tools:layout="@layout/map_fragment" />
     <fragment
         android:id="@+id/winnerFragment"
         android:name="com.srm325.gobble.ui.features.winner_screen.WinnerFragment"
